@@ -14,6 +14,7 @@ jobs:
         runs-on: windows-latest
         needs: [build-on-windows, build-on-linux]
         permissions:
+            # "write" permission is required to create a release. (NO NEED to grant at repository settings.)
             contents: write
         steps:
             # CHECKOUT REPOSITORY
@@ -28,7 +29,9 @@ jobs:
                 name: my-temporary-artifacts
             # Download crate
           - name: Download CLI utility
-            run: Invoke-WebRequest -Uri "https://github.com/mass10/r-gh-create-release/releases/latest/download/r-gh-create-release.exe" -OutFile "r-gh-create-release.exe"
+            run: Invoke-WebRequest `
+                     -Uri "https://github.com/mass10/r-gh-create-release/releases/latest/download/r-gh-create-release.exe" `
+                     -OutFile "r-gh-create-release.exe"
             # CREATE RELEASE AND UPLOAD EXECUTABLE FILE
           - name: release を作成して実行ファイルを公開
             run: .\r-gh-create-release.exe --file r-env --file r-env.exe
