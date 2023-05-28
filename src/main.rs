@@ -1,22 +1,36 @@
 //!
-//! r-regex
+//! r-env: CLI utility for .env
 //!  
 
 use std::io::Read;
 
+/// Check if the specified file exists.
+///
+/// # Arguments
+/// * `file` - File path.
+/// 
+/// # Returns
+/// true if the file exists.
 fn is_file_existing(file: &str) -> bool {
 	let path = std::path::Path::new(file);
 	return path.exists();
 }
 
 /// Read the whole lines from file.
-fn read_from_file(file: &str) -> Result<String, Box<dyn std::error::Error>> {
+///
+/// # Arguments
+/// * `file` - File path.
+/// 
+/// # Returns
+/// File content.
+fn read_text_file(file: &str) -> Result<String, Box<dyn std::error::Error>> {
 	let mut file = std::fs::File::open(file)?;
 	let mut buffer = String::new();
 	file.read_to_string(&mut buffer)?;
 	return Ok(buffer);
 }
 
+/// Try to parse the content as .env format.
 fn parse_dotenv_string(content: &str) -> Result<std::collections::HashMap<String, String>, Box<dyn std::error::Error>> {
 	let mut dotenv = std::collections::HashMap::new();
 
@@ -41,9 +55,16 @@ fn parse_dotenv_string(content: &str) -> Result<std::collections::HashMap<String
 	return Ok(dotenv);
 }
 
+/// Try to parse the specified file as .env format.
+///
+/// # Arguments
+/// * `file` - File path.
+/// 
+/// # Returns
+/// File content as string map.
 fn read_dotenv_file(file: &str) -> Result<std::collections::HashMap<String, String>, Box<dyn std::error::Error>> {
-	// Read whole file
-	let buffer = read_from_file(file)?;
+	// Read the whole file
+	let buffer = read_text_file(file)?;
 
 	// parse
 	let map = parse_dotenv_string(&buffer)?;
@@ -51,6 +72,53 @@ fn read_dotenv_file(file: &str) -> Result<std::collections::HashMap<String, Stri
 	return Ok(map);
 }
 
+/// Read file if exists.
+///
+/// # Arguments
+/// * `file` - File path.
+///
+/// # Returns
+/// File content.
+fn read_file_if_exists(file: &str) -> Result<String, Box<dyn std::error::Error>> {
+	if !is_file_existing(file) {
+		return Ok("".into());
+	}
+
+	let content = read_text_file(file)?;
+
+	return Ok(content);
+}
+
+/// Try to parse stdin as .env format.
+///
+/// # Returns
+/// File content as string map.
+fn read_dotenv_file_from_stdin() -> Result<std::collections::HashMap<String, String>, Box<dyn std::error::Error>> {
+	// Read stdin all.
+	let buffer = read_whole_lines_from_stdin()?;
+
+	// Try to parse as .env.
+	let map = parse_dotenv_string(&buffer)?;
+
+	return Ok(map);
+}
+
+/// Read .env file if exists.
+///
+/// # Arguments
+/// * `path` - File path.
+///
+/// # Returns
+/// File content as string map.
+fn read_dotenv_file_if_exists(path: &str) -> Result<std::collections::HashMap<String, String>, Box<dyn std::error::Error>> {
+	let content = read_file_if_exists(path)?;
+
+	let map = parse_dotenv_string(&content)?;
+
+	return Ok(map);
+}
+
+/// .env data structure (simple string map)
 struct DotenvFile {
 	/// Map of String
 	map: std::collections::HashMap<String, String>,
@@ -58,98 +126,45 @@ struct DotenvFile {
 
 impl DotenvFile {
 	/// Configure with specified .env file.
-	fn configure(use_stdin: bool, file: &Option<String>) -> Result<DotenvFile, Box<dyn std::error::Error>> {
+	fn configure(use_stdin: bool, file: Option<String>) -> Result<DotenvFile, Box<dyn std::error::Error>> {
 		if use_stdin {
-			// Read stdin all.
-			let buffer = read_whole_lines_from_stdin()?;
-
-			// Parse as .env.
-			let string_map = parse_dotenv_string(&buffer)?;
+			// Try to parse stdin as .env.
+			let vars = read_dotenv_file_from_stdin()?;
 
 			// Initialize object.
-			let instance = Self { map: string_map };
+			let instance = Self { map: vars };
 
 			return Ok(instance);
 		} else if file.is_none() {
-			// IGNORE MISSING default .env file.
-			let file = ".env";
-
-			if !is_file_existing(file) {
-				return Ok(DotenvFile {
-					map: std::collections::HashMap::new(),
-				});
-			}
-
-			// Read .env file.
-			let string_map = read_dotenv_file(file)?;
+			// Try to read default file. (IGNORE MISSING)
+			let vars = read_dotenv_file_if_exists(".env")?;
 
 			// Initialize object.
-			let instance = Self { map: string_map };
+			let instance = Self { map: vars };
 
 			return Ok(instance);
 		} else {
-			// Read from specified file.
-			let file = file.clone().unwrap();
-
-			let string_map = read_dotenv_file(&file)?;
+			// Try to parse specified file as .env.
+			let file = file.unwrap();
+			let vars = read_dotenv_file(&file)?;
 
 			// Initialize object.
-			let instance = Self { map: string_map };
+			let instance = Self { map: vars };
 
 			return Ok(instance);
 		}
 	}
 
+	/// Get reference to the internal map.
 	pub fn get_inner_map(&self) -> &std::collections::HashMap<String, String> {
 		return &self.map;
 	}
 }
 
-/// Helpers for container.
-trait MatchesHelper {
-	fn opt_string(&self, key: &str) -> String;
-}
-
-impl MatchesHelper for getopts::Matches {
-	fn opt_string(&self, key: &str) -> String {
-		if !self.opt_present(key) {
-			return "".to_string();
-		}
-		let value = self.opt_str(key).unwrap();
-		return value;
-	}
-}
-
-/// Retrieve the result of the regular expression.
-#[allow(unused)]
-fn get_regex_result(string_value: &str, expression_string: &str) -> Result<String, String> {
-	let expression = regex::Regex::new(&expression_string);
-	if expression.is_err() {
-		eprintln!("ERROR: regex compile error. {}", expression.err().unwrap());
-		return Err("".into());
-	}
-	let expression = expression.unwrap();
-
-	// try to capture by "(...)".
-	let capture_result = expression.captures_at(&string_value, 0);
-	if capture_result.is_none() {
-		eprintln!("not match.");
-		return Err("".into());
-	}
-
-	// result
-	let capture_result = capture_result.unwrap();
-	if capture_result.len() <= 1 {
-		eprintln!("not match.");
-		return Err("".into());
-	}
-
-	let captured = capture_result.get(1).unwrap();
-	let result = captured.as_str();
-	return Ok(result.into());
-}
-
 /// Read to end from stdin.
+///
+/// # Returns
+/// Read content.
 fn read_whole_lines_from_stdin() -> Result<String, Box<dyn std::error::Error>> {
 	let stdin = std::io::stdin();
 	let mut handle = stdin.lock();
@@ -159,6 +174,10 @@ fn read_whole_lines_from_stdin() -> Result<String, Box<dyn std::error::Error>> {
 }
 
 /// Launch a new process.
+///
+/// # Arguments
+/// * `commands` - Command line arguments.
+/// * `env` - Environment variables.
 fn launch_command(commands: &Vec<String>, env: &DotenvFile) -> Result<(), Box<dyn std::error::Error>> {
 	if commands.len() == 0 {
 		eprintln!("ERROR: command is empty.");
@@ -174,34 +193,35 @@ fn launch_command(commands: &Vec<String>, env: &DotenvFile) -> Result<(), Box<dy
 		command.env(k, v);
 	}
 
-	let mut result = command.spawn()?;
-	let status = result.wait()?;
-	eprintln!("Process exited with status: {}", status);
+	let _result = command.spawn()?.wait()?;
 
 	return Ok(());
 }
 
-/// EXECUTE READ ENV
+/// Execute command.
 fn execute(use_stdin: bool, env_file: Option<String>, commands: &Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
-	let result = DotenvFile::configure(use_stdin, &env_file);
-	if result.is_err() {
-		eprintln!("ERROR: {}", result.err().unwrap());
-		return Ok(());
-	}
+	// Try to configure.
+	let result = DotenvFile::configure(use_stdin, env_file)?;
 
 	// Launch a new process.
-	launch_command(&commands, &result.unwrap())?;
+	launch_command(&commands, &result)?;
 
 	return Ok(());
 }
 
 /// Dump variables
 fn dump_variables(use_stdin: bool, path: Option<String>) -> Result<(), Box<dyn std::error::Error>> {
-	let dotenv = DotenvFile::configure(use_stdin, &path)?;
+	// Try to configure.
+	let dotenv = DotenvFile::configure(use_stdin, path)?;
+
+	// internal map.
 	let map = dotenv.get_inner_map();
+
+	// dump.
 	for (key, value) in map {
 		println!("{}={}", key, value);
 	}
+
 	return Ok(());
 }
 
@@ -217,27 +237,33 @@ fn main() {
 	let result = options.parse(std::env::args().skip(1));
 	if result.is_err() {
 		eprintln!("{}", options.usage(""));
-		return;
+		// exit with 1
+		std::process::exit(1);
 	}
 	let input = result.unwrap();
 
+	// Whether to use stdin as .env.
+	let use_stdin = input.opt_present("use-stdin");
+
+	// File path to parse. (DEFAULT: .env)
+	let option_file = input.opt_str("file");
+
 	if input.opt_present("help") {
-		// SHOW HELP.
+		// ========== SHOW HELP ==========
 		eprintln!("{}", options.usage(""));
-		return;
 	} else if input.opt_present("dump") {
-		// DUMP VARIABLES.
-		let result = dump_variables(input.opt_present("use-stdin"), input.opt_str("file"));
+		// ========== DUMP VARIABLES ==========
+		let result = dump_variables(use_stdin, option_file);
 		if result.is_err() {
 			eprintln!("ERROR: {}", result.err().unwrap());
-			return;
+			std::process::exit(1);
 		}
 	} else {
-		// EXECUTE READ ENV AND LAUNCH COMMAND.
-		let result = execute(input.opt_present("use-stdin"), input.opt_str("file"), &input.free);
+		// ========== EXECUTE READ ENV AND PASS TO NEXT COMMAND ==========
+		let result = execute(use_stdin, option_file, &input.free);
 		if result.is_err() {
 			eprintln!("ERROR: {}", result.err().unwrap());
-			return;
+			std::process::exit(1);
 		}
 	};
 }
