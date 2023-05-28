@@ -58,16 +58,16 @@ fn parse_dotenv_string(content: &str) -> Result<std::collections::HashMap<String
 /// Try to parse the specified file as .env format.
 ///
 /// # Arguments
-/// * `file` - File path.
+/// * `path` - File path.
 /// 
 /// # Returns
 /// File content as string map.
-fn read_dotenv_file(file: &str) -> Result<std::collections::HashMap<String, String>, Box<dyn std::error::Error>> {
+fn read_dotenv_file(path: &str) -> Result<std::collections::HashMap<String, String>, Box<dyn std::error::Error>> {
 	// Read the whole file
-	let buffer = read_text_file(file)?;
+	let content = read_text_file(path)?;
 
-	// parse
-	let map = parse_dotenv_string(&buffer)?;
+	// Try to parse as .env.
+	let map = parse_dotenv_string(&content)?;
 
 	return Ok(map);
 }
@@ -95,10 +95,10 @@ fn read_file_if_exists(file: &str) -> Result<String, Box<dyn std::error::Error>>
 /// File content as string map.
 fn read_dotenv_file_from_stdin() -> Result<std::collections::HashMap<String, String>, Box<dyn std::error::Error>> {
 	// Read stdin all.
-	let buffer = read_whole_lines_from_stdin()?;
+	let content = read_whole_lines_from_stdin()?;
 
 	// Try to parse as .env.
-	let map = parse_dotenv_string(&buffer)?;
+	let map = parse_dotenv_string(&content)?;
 
 	return Ok(map);
 }
@@ -111,8 +111,10 @@ fn read_dotenv_file_from_stdin() -> Result<std::collections::HashMap<String, Str
 /// # Returns
 /// File content as string map.
 fn read_dotenv_file_if_exists(path: &str) -> Result<std::collections::HashMap<String, String>, Box<dyn std::error::Error>> {
+	// Read the whole file (if exists).
 	let content = read_file_if_exists(path)?;
 
+	// Try to parse as .env.
 	let map = parse_dotenv_string(&content)?;
 
 	return Ok(map);
