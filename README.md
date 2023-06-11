@@ -6,17 +6,13 @@ CLI utility for .env or something like this.
 
 # 始め方 Getting Started
 
-cargo を使用してインストールするか
-
-Install
+cargo を使用してインストールします。cargo instalal.
 
 ```sh
 cargo install --git https://github.com/mass10/r-env --branch main
 ```
 
-単独で実行可能なバイナリファイルをダウンロードできます。
-
-Or download single binary file.
+もしくは、単独で実行可能なバイナリファイルをダウンロードできます。Or can download an executable.
 
 ```sh
 wget https://github.com/mass10/r-env/releases/latest/download/r-env
@@ -24,22 +20,19 @@ wget https://github.com/mass10/r-env/releases/latest/download/r-env
 
 # 凡例 Examples
 
-### 環境変数を表示します。
-Print environment variables.
+### 環境変数を表示 する Print environment variables
 
 ```sh
 r-env cmd.exe /C SET
 ```
 
-### .env をダンプします。
-Dump .env
+### .env をダンプする Dump .env
 
 ```sh
 r-env --dump
 ```
 
-### ファイルを指定してダンプします。
-Dump specified .env file.
+### ファイルを指定してダンプ Dump specified .env file
 
 ```sh
 r-env --dump --file .env.development
