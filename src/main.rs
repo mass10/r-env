@@ -8,7 +8,7 @@ use std::io::Read;
 ///
 /// # Arguments
 /// * `file` - File path.
-/// 
+///
 /// # Returns
 /// true if the file exists.
 fn is_file_existing(file: &str) -> bool {
@@ -20,7 +20,7 @@ fn is_file_existing(file: &str) -> bool {
 ///
 /// # Arguments
 /// * `file` - File path.
-/// 
+///
 /// # Returns
 /// File content.
 fn read_text_file(file: &str) -> Result<String, Box<dyn std::error::Error>> {
@@ -59,7 +59,7 @@ fn parse_dotenv_string(content: &str) -> Result<std::collections::HashMap<String
 ///
 /// # Arguments
 /// * `path` - File path.
-/// 
+///
 /// # Returns
 /// File content as string map.
 fn read_dotenv_file(path: &str) -> Result<std::collections::HashMap<String, String>, Box<dyn std::error::Error>> {
