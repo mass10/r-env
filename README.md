@@ -6,13 +6,13 @@ CLI utility for .env or something like this.
 
 # 始め方 Getting Started
 
-cargo を使用してインストールします。cargo instalal.
+cargo を使用してインストールします。Try cargo install.
 
 ```sh
 cargo install --git https://github.com/mass10/r-env --branch main
 ```
 
-もしくは、単独で実行可能なバイナリファイルをダウンロードできます。Or can download an executable.
+もしくは、単独で実行可能なバイナリファイルをダウンロードできます。Or executable file available.
 
 ```sh
 wget https://github.com/mass10/r-env/releases/latest/download/r-env
