@@ -18,7 +18,7 @@ wget https://github.com/mass10/r-env/releases/latest/download/r-env
 
 # 凡例 Examples
 
-### 環境変数を表示 する Print environment variables
+### 環境変数を表示する Print environment variables
 
 ```sh
 r-env cmd.exe /C SET
