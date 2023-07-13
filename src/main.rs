@@ -200,31 +200,35 @@ fn launch_command(commands: &Vec<String>, env: &DotenvFile) -> Result<(), Box<dy
 	return Ok(());
 }
 
-/// Execute command.
-fn execute(use_stdin: bool, env_file: Option<String>, commands: &Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
-	// Try to configure.
-	let result = DotenvFile::configure(use_stdin, env_file)?;
+struct Application {}
 
-	// Launch a new process.
-	launch_command(&commands, &result)?;
+impl Application {
+	/// Execute command.
+	fn execute(&self, use_stdin: bool, env_file: Option<String>, commands: &Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
+		// Try to configure.
+		let result = DotenvFile::configure(use_stdin, env_file)?;
 
-	return Ok(());
-}
+		// Launch a new process.
+		launch_command(&commands, &result)?;
 
-/// Dump variables
-fn dump_variables(use_stdin: bool, path: Option<String>) -> Result<(), Box<dyn std::error::Error>> {
-	// Try to configure.
-	let dotenv = DotenvFile::configure(use_stdin, path)?;
-
-	// internal map.
-	let map = dotenv.get_inner_map();
-
-	// dump.
-	for (key, value) in map {
-		println!("{}={}", key, value);
+		return Ok(());
 	}
 
-	return Ok(());
+	/// Dump variables
+	fn dump_variables(&self, use_stdin: bool, path: Option<String>) -> Result<(), Box<dyn std::error::Error>> {
+		// Try to configure.
+		let dotenv = DotenvFile::configure(use_stdin, path)?;
+
+		// internal map.
+		let map = dotenv.get_inner_map();
+
+		// dump.
+		for (key, value) in map {
+			println!("{}={}", key, value);
+		}
+
+		return Ok(());
+	}
 }
 
 /// Entrypoint of a Rust application.
@@ -255,14 +259,16 @@ fn main() {
 		eprintln!("{}", options.usage(""));
 	} else if input.opt_present("dump") {
 		// ========== DUMP VARIABLES ==========
-		let result = dump_variables(use_stdin, option_file);
+		let app = Application {};
+		let result = app.dump_variables(use_stdin, option_file);
 		if result.is_err() {
 			eprintln!("ERROR: {}", result.err().unwrap());
 			std::process::exit(1);
 		}
 	} else {
 		// ========== EXECUTE READ ENV AND PASS TO NEXT COMMAND ==========
-		let result = execute(use_stdin, option_file, &input.free);
+		let app = Application {};
+		let result = app.execute(use_stdin, option_file, &input.free);
 		if result.is_err() {
 			eprintln!("ERROR: {}", result.err().unwrap());
 			std::process::exit(1);
