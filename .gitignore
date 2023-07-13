@@ -1,1 +1,4 @@
 /target
+/make.bat
+/makefile
+/.env
