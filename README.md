@@ -1,8 +1,6 @@
 # 概要 Overview
 
-.env を操作する CLI ユーティリティです。
-
-CLI utility for .env or something like this.
+.env を操作する CLI ユーティリティです。CLI utility for .env or something like this.
 
 # 始め方 Getting Started
 
