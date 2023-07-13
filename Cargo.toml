@@ -1,10 +1,22 @@
 [package]
 name = "r-env"
+description = "CLI utility for .env file"
 version = "0.1.4"
+authors = ["Irisawa Masaru <irisawa.masaru@gmail.com>"]
 edition = "2021"
+license = "MIT"
+repository = "https://github.com/mass10/r-env/"
+documentation = "https://docs.rs/crate/r-env/"
+categories = ["command-line-utilities"]
+include = [
+    "src/**/*.rs",
+    "Cargo.toml",
+    "LICENSE",
+    "README.md"
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-getopts = "*"
-regex = "*"
+getopts = "^0.2.21"
+regex = "^1.9.1"
