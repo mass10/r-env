@@ -30,7 +30,7 @@ r-env cmd.exe /C SET
 r-env --dump
 ```
 
-### ファイルを指定してダンプ Dump specified .env file
+### ファイルを指定してダンプする Dump specified .env file
 
 ```sh
 r-env --dump --file .env.development
