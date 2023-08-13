@@ -5,13 +5,23 @@
 mod app;
 mod env;
 
-/// Entrypoint of a Rust application.
-fn main() {
+/// Initialize commandline options parser.
+///
+/// # Returns
+/// parser.
+fn create_options() -> getopts::Options {
 	let mut options = getopts::Options::new();
 	options.optflag("", "dump", "Dump variables.");
 	options.optflag("h", "help", "usage");
 	options.optflag("", "use-stdin", "Use command stdin as .env");
 	options.opt("", "file", ".env", "STRING", getopts::HasArg::Yes, getopts::Occur::Optional);
+	return options;
+}
+
+/// Entrypoint of a Rust application.
+fn main() {
+	// Create options parser.
+	let options = create_options();
 
 	// Analyzing command line arguments.
 	let result = options.parse(std::env::args().skip(1));
