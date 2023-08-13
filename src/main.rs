@@ -9,7 +9,7 @@ mod env;
 ///
 /// # Returns
 /// parser.
-fn create_options() -> getopts::Options {
+fn create_options_parser() -> getopts::Options {
 	let mut options = getopts::Options::new();
 	options.optflag("", "dump", "Dump variables.");
 	options.optflag("h", "help", "usage");
@@ -21,7 +21,7 @@ fn create_options() -> getopts::Options {
 /// Entrypoint of a Rust application.
 fn main() {
 	// Create options parser.
-	let options = create_options();
+	let options = create_options_parser();
 
 	// Analyzing command line arguments.
 	let result = options.parse(std::env::args().skip(1));
