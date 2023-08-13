@@ -63,13 +63,16 @@ impl Configuration {
 			} else if arg == "--file" {
 				conf.file = Some("".to_string());
 				current_section = "--file";
-			} else if arg.starts_with("--help") {
+			} else if arg == "--help" {
 				conf.help = true;
 				current_section = "";
-			} else if arg.starts_with("--use-stdin") {
+			} else if arg == "-h" {
+				conf.help = true;
+				current_section = "";
+			} else if arg == "--use-stdin" {
 				conf.use_stdin = true;
 				current_section = ""
-			} else if arg.starts_with("--") {
+			} else if arg.starts_with("-") {
 				let err = format!("Unknown option {}.", arg);
 				return Err(err.into());
 			} else if current_section == "--file" {
