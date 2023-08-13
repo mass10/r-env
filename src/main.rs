@@ -5,20 +5,7 @@
 mod app;
 mod env;
 
-/// Initialize commandline options parser.
-///
-/// # Returns
-/// parser.
-#[allow(unused)]
-fn create_options_parser() -> getopts::Options {
-	let mut options = getopts::Options::new();
-	options.optflag("", "dump", "Dump variables.");
-	options.optflag("h", "help", "usage");
-	options.optflag("", "use-stdin", "Use command stdin as .env");
-	options.opt("", "file", ".env", "STRING", getopts::HasArg::Yes, getopts::Occur::Optional);
-	return options;
-}
-
+/// Shows usage.
 fn usage() {
 	let pkg_name = env!("CARGO_PKG_NAME");
 	eprintln!("Usage: {} [OPTIONS] [COMMAND]", pkg_name);
@@ -29,12 +16,23 @@ fn usage() {
 	eprintln!("        --use-stdin         Use command stdin as .env");
 	eprintln!("        --file STRING       .env");
 }
+
+/// Configuration class
 #[derive(Debug)]
 struct Configuration {
+	/// Command line arguments.
 	command: Vec<String>,
+
+	/// Dump variables.
 	dump: bool,
+
+	/// .env file path.
 	file: Option<String>,
+
+	/// Show help.
 	help: bool,
+
+	/// Use stdin as .env
 	use_stdin: bool,
 }
 
