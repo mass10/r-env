@@ -119,7 +119,10 @@ fn main() {
 		let app = app::Application;
 		let result = app.dump_variables(input.use_stdin, input.file);
 		if result.is_err() {
-			eprintln!("ERROR: {}", result.err().unwrap());
+			let pkg_name = env!("CARGO_PKG_NAME");
+			eprintln!("{}: {}", pkg_name, result.err().unwrap());
+			eprintln!();
+			usage();
 			std::process::exit(1);
 		}
 	} else {
