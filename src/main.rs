@@ -133,5 +133,9 @@ fn main() {
 			eprintln!("ERROR: {}", result.err().unwrap());
 			std::process::exit(1);
 		}
+		let exit_code = result.unwrap();
+		if exit_code != 0 {
+			std::process::exit(exit_code);
+		}
 	};
 }
