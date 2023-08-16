@@ -9,10 +9,9 @@ use crate::env;
 /// # Arguments
 /// * `env` - Environment variables.
 /// * `commands` - Command line arguments.
-fn launch_command(env: &env::DotenvFile, commands: &Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
+fn launch_command(env: &env::DotenvFile, commands: &Vec<String>) -> Result<i32, Box<dyn std::error::Error>> {
 	if commands.len() == 0 {
-		eprintln!("ERROR: command is empty.");
-		return Ok(());
+		return Err("ERROR: command is empty.".into());
 	}
 
 	let (command_str, args) = commands.split_first().unwrap();
@@ -24,9 +23,13 @@ fn launch_command(env: &env::DotenvFile, commands: &Vec<String>) -> Result<(), B
 		command.env(k, v);
 	}
 
-	let _result = command.spawn()?.wait()?;
+	let result = command.spawn()?.wait()?;
+	if !result.success() {
+		let exit_code = result.code().unwrap();
+		return Ok(exit_code);
+	}
 
-	return Ok(());
+	return Ok(0);
 }
 
 pub struct Application;
@@ -37,14 +40,12 @@ impl Application {
 	/// # Arguments
 	/// * `use_stdin` - Whether to use stdin as .env.
 	/// * `env_file` - File path to parse. (DEFAULT: .env)
-	pub fn execute(&self, use_stdin: bool, env_file: Option<String>, commands: &Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
+	pub fn execute(&self, use_stdin: bool, env_file: Option<String>, commands: &Vec<String>) -> Result<i32, Box<dyn std::error::Error>> {
 		// Try to configure.
 		let dotenv = env::DotenvFile::configure(use_stdin, env_file)?;
 
 		// Launch a new process.
-		launch_command(&dotenv, &commands)?;
-
-		return Ok(());
+		return launch_command(&dotenv, &commands);
 	}
 
 	/// Dump variables
