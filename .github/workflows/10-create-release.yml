@@ -78,6 +78,7 @@ jobs:
                 path: |
                     target\release\r-env.exe
                     Cargo.toml
+                if-no-files-found: error
 
     # FOR LINUX
     build-on-linux:
@@ -97,3 +98,4 @@ jobs:
             with:
                 name: my-temporary-artifacts
                 path: target/release/r-env
+                if-no-files-found: error
