@@ -79,9 +79,7 @@ jobs:
             uses: actions/upload-artifact@v3
             with:
                 name: my-temporary-artifacts
-                path: |
-                    target\release\r-env.exe
-                    Cargo.toml
+                path: target\release\r-env.exe
                 if-no-files-found: error
 
     # FOR LINUX
