@@ -20,17 +20,17 @@ fn usage() {
 /// Configuration class
 #[derive(Debug)]
 struct Configuration {
-	/// Command line arguments.
+	/// Command to execute.
 	command: Vec<String>,
 
 	/// Dump variables.
-	dump: bool,
+	exec_dump: bool,
 
 	/// .env file path.
 	file: Option<String>,
 
 	/// Show help.
-	help: bool,
+	show_help: bool,
 
 	/// Use stdin as .env
 	use_stdin: bool,
@@ -41,9 +41,9 @@ impl Configuration {
 	pub fn new(args: &Vec<String>) -> Result<Self, Box<dyn std::error::Error>> {
 		let mut conf = Self {
 			command: vec![],
-			dump: false,
+			exec_dump: false,
 			file: None,
-			help: false,
+			show_help: false,
 			use_stdin: false,
 		};
 
@@ -58,16 +58,16 @@ impl Configuration {
 				current_section = "";
 				conf.command.push(arg.to_string());
 			} else if arg == "--dump" {
-				conf.dump = true;
+				conf.exec_dump = true;
 				current_section = "";
 			} else if arg == "--file" {
 				conf.file = Some("".to_string());
 				current_section = "--file";
 			} else if arg == "--help" {
-				conf.help = true;
+				conf.show_help = true;
 				current_section = "";
 			} else if arg == "-h" {
-				conf.help = true;
+				conf.show_help = true;
 				current_section = "";
 			} else if arg == "--use-stdin" {
 				conf.use_stdin = true;
@@ -111,10 +111,10 @@ fn main() {
 	}
 	let input = result.unwrap();
 
-	if input.help {
+	if input.show_help {
 		// ========== SHOW HELP ==========
 		usage();
-	} else if input.dump {
+	} else if input.exec_dump {
 		// ========== DUMP VARIABLES ==========
 		let app = app::Application;
 		let result = app.dump_variables(input.use_stdin, input.file);
