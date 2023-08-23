@@ -37,7 +37,7 @@ fn main() {
 		usage();
 	} else if input.exec_dump {
 		// ========== DUMP VARIABLES ==========
-		let app = app::Application;
+		let app = app::new();
 		let result = app.dump_variables(input.use_stdin, input.file);
 		if result.is_err() {
 			let pkg_name = env!("CARGO_PKG_NAME");
@@ -48,8 +48,8 @@ fn main() {
 		}
 	} else {
 		// ========== EXECUTE READ ENV AND PASS TO NEXT COMMAND ==========
-		let app = app::Application;
-		let result = app.execute(input.use_stdin, input.file, &input.command);
+		let app = app::new();
+		let result = app.execute_command(input.use_stdin, input.file, &input.command);
 		if result.is_err() {
 			eprintln!("ERROR: {}", result.err().unwrap());
 			std::process::exit(1);

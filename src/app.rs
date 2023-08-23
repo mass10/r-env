@@ -32,15 +32,29 @@ fn launch_command(env: &env::DotenvFile, commands: &Vec<String>) -> Result<i32, 
 	return Ok(0);
 }
 
-pub struct Application;
-
-impl Application {
+/// Application trait.
+pub trait Application {
 	/// Execute command.
 	///
 	/// # Arguments
 	/// * `use_stdin` - Whether to use stdin as .env.
 	/// * `env_file` - File path to parse. (DEFAULT: .env)
-	pub fn execute(&self, use_stdin: bool, env_file: Option<String>, commands: &Vec<String>) -> Result<i32, Box<dyn std::error::Error>> {
+	/// * `commands` - Command and arguments.
+	fn execute_command(&self, use_stdin: bool, env_file: Option<String>, commands: &Vec<String>) -> Result<i32, Box<dyn std::error::Error>>;
+
+	/// Dump variables
+	///
+	/// # Arguments
+	/// * `use_stdin` - Whether to use stdin as .env.
+	/// * `env_file` - File path to parse. (DEFAULT: .env)
+	fn dump_variables(&self, use_stdin: bool, env_file: Option<String>) -> Result<(), Box<dyn std::error::Error>>;
+}
+
+struct ApplicationImpl;
+
+impl Application for ApplicationImpl {
+	/// Execute command.
+	fn execute_command(&self, use_stdin: bool, env_file: Option<String>, commands: &Vec<String>) -> Result<i32, Box<dyn std::error::Error>> {
 		// Try to configure.
 		let dotenv = env::DotenvFile::configure(use_stdin, env_file)?;
 
@@ -49,7 +63,7 @@ impl Application {
 	}
 
 	/// Dump variables
-	pub fn dump_variables(&self, use_stdin: bool, env_file: Option<String>) -> Result<(), Box<dyn std::error::Error>> {
+	fn dump_variables(&self, use_stdin: bool, env_file: Option<String>) -> Result<(), Box<dyn std::error::Error>> {
 		// Try to configure.
 		let dotenv = env::DotenvFile::configure(use_stdin, env_file)?;
 
@@ -63,4 +77,9 @@ impl Application {
 
 		return Ok(());
 	}
+}
+
+/// Create a new instance of Application.
+pub fn new() -> Box<dyn Application> {
+	return Box::new(ApplicationImpl {});
 }
