@@ -2,14 +2,14 @@
 //! Application
 //!
 
-use crate::env;
+use crate::dotenv;
 
 /// Launch a new process.
 ///
 /// # Arguments
 /// * `env` - Environment variables.
 /// * `commands` - Command line arguments.
-fn launch_command(env: &env::DotenvFile, commands: &Vec<String>) -> Result<i32, Box<dyn std::error::Error>> {
+fn launch_command(env: Box<dyn dotenv::DotenvFile>, commands: &Vec<String>) -> Result<i32, Box<dyn std::error::Error>> {
 	if commands.len() == 0 {
 		return Err("ERROR: command is empty.".into());
 	}
@@ -19,7 +19,9 @@ fn launch_command(env: &env::DotenvFile, commands: &Vec<String>) -> Result<i32, 
 	let mut command = std::process::Command::new(&command_str);
 	command.args(args);
 
-	for (k, v) in &env.map {
+	let map = env.get_inner_map();
+
+	for (k, v) in map {
 		command.env(k, v);
 	}
 
@@ -50,22 +52,23 @@ pub trait Application {
 	fn dump_variables(&self, use_stdin: bool, env_file: Option<String>) -> Result<(), Box<dyn std::error::Error>>;
 }
 
+/// Application implementation.
 struct ApplicationImpl;
 
 impl Application for ApplicationImpl {
 	/// Execute command.
 	fn execute_command(&self, use_stdin: bool, env_file: Option<String>, commands: &Vec<String>) -> Result<i32, Box<dyn std::error::Error>> {
 		// Try to configure.
-		let dotenv = env::DotenvFile::configure(use_stdin, env_file)?;
+		let dotenv = dotenv::configure(use_stdin, env_file)?;
 
 		// Launch a new process.
-		return launch_command(&dotenv, &commands);
+		return launch_command(dotenv, &commands);
 	}
 
 	/// Dump variables
 	fn dump_variables(&self, use_stdin: bool, env_file: Option<String>) -> Result<(), Box<dyn std::error::Error>> {
 		// Try to configure.
-		let dotenv = env::DotenvFile::configure(use_stdin, env_file)?;
+		let dotenv = dotenv::configure(use_stdin, env_file)?;
 
 		// internal map.
 		let map = dotenv.get_inner_map();

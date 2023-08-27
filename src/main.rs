@@ -4,7 +4,7 @@
 
 mod app;
 mod conf;
-mod env;
+mod dotenv;
 
 /// Shows usage.
 fn usage() {

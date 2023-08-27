@@ -120,15 +120,24 @@ fn read_dotenv_file(path: &str) -> Result<std::collections::HashMap<String, Stri
 	return Ok(map);
 }
 
+pub trait DotenvFile {
+	fn get_inner_map(&self) -> &std::collections::HashMap<String, String>;
+}
+
+pub fn configure(use_stdin: bool, file: Option<String>) -> Result<Box<dyn DotenvFile>, Box<dyn std::error::Error>> {
+	let instance = DotenvFileImpl::configure(use_stdin, file)?;
+	return Ok(Box::new(instance));
+}
+
 /// .env data structure (simple string map)
-pub struct DotenvFile {
+struct DotenvFileImpl {
 	/// Map of String
 	pub map: std::collections::HashMap<String, String>,
 }
 
-impl DotenvFile {
+impl DotenvFileImpl {
 	/// Configure with specified .env file.
-	pub fn configure(use_stdin: bool, file: Option<String>) -> Result<DotenvFile, Box<dyn std::error::Error>> {
+	pub fn configure(use_stdin: bool, file: Option<String>) -> Result<DotenvFileImpl, Box<dyn std::error::Error>> {
 		if use_stdin {
 			// Try to parse stdin as .env.
 			let vars = read_dotenv_file_from_stdin()?;
@@ -156,9 +165,11 @@ impl DotenvFile {
 			return Ok(instance);
 		}
 	}
+}
 
+impl DotenvFile for DotenvFileImpl {
 	/// Get reference to the internal map.
-	pub fn get_inner_map(&self) -> &std::collections::HashMap<String, String> {
+	fn get_inner_map(&self) -> &std::collections::HashMap<String, String> {
 		return &self.map;
 	}
 }
