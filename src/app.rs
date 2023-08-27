@@ -19,7 +19,7 @@ fn launch_command(env: Box<dyn dotenv::DotenvFile>, commands: &Vec<String>) -> R
 	let mut command = std::process::Command::new(&command_str);
 	command.args(args);
 
-	let map = env.get_inner_map();
+	let map = env.as_map();
 
 	for (k, v) in map {
 		command.env(k, v);
@@ -71,7 +71,7 @@ impl Application for ApplicationImpl {
 		let dotenv = dotenv::configure(use_stdin, env_file)?;
 
 		// internal map.
-		let map = dotenv.get_inner_map();
+		let map = dotenv.as_map();
 
 		// dump.
 		for (key, value) in map {

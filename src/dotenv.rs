@@ -121,7 +121,7 @@ fn read_dotenv_file(path: &str) -> Result<std::collections::HashMap<String, Stri
 }
 
 pub trait DotenvFile {
-	fn get_inner_map(&self) -> &std::collections::HashMap<String, String>;
+	fn as_map(&self) -> &std::collections::HashMap<String, String>;
 }
 
 pub fn configure(use_stdin: bool, file: Option<String>) -> Result<Box<dyn DotenvFile>, Box<dyn std::error::Error>> {
@@ -169,7 +169,7 @@ impl DotenvFileImpl {
 
 impl DotenvFile for DotenvFileImpl {
 	/// Get reference to the internal map.
-	fn get_inner_map(&self) -> &std::collections::HashMap<String, String> {
+	fn as_map(&self) -> &std::collections::HashMap<String, String> {
 		return &self.map;
 	}
 }
